@@ -1,0 +1,55 @@
+// use prisma-8
+
+model User {
+  id                  Int                   @id @default(autoincrement())
+  email               String                @unique
+  name                String
+  password            String
+
+  friendships         Friend[]              @relation("UserFriendships")
+  friendOf            Friend[]              @relation("FriendOf")
+
+  expensesPaid        Expense[]
+  expenseParticipants ExpenseParticipants[]
+}
+
+
+model Friend {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  status    Status
+  created   DateTime @default(now())
+
+  user      User @relation("UserFriendships", fields: [userId], references: [id])
+  friend    User @relation("FriendOf", fields: [friendId], references: [id])
+}
+
+
+model Expense {
+  id           Int                   @id @default(autoincrement())
+  amount       Decimal
+  description  String
+  paidById     Int
+  created      DateTime              @default(now())
+
+  paidBy       User                  @relation(fields: [paidById], references: [id])
+  participants ExpenseParticipants[]
+}
+
+
+model ExpenseParticipants {
+  id          Int      @id @default(autoincrement())
+  expenseId   Int
+  userId      Int
+  amountOwed  Decimal
+
+  expense     Expense  @relation(fields: [expenseId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+
+enum Status {
+  PENDING
+  ACCEPTED
+}
